@@ -2,7 +2,6 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { NgForm } from '@angular/forms';
 
 import { AuthService } from '../services/auth.service';
-import { Router } from '@angular/router';
 
 import { AuthData } from '../AuthData';
 @Component({
@@ -12,13 +11,10 @@ import { AuthData } from '../AuthData';
 })
 export class LoginComponent implements OnInit, OnDestroy {
   isLoggedIn: boolean;
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(private authService: AuthService) {}
 
   ngOnInit() {
     this.isLoggedIn = this.authService.getIsAuth();
-    if (this.isLoggedIn) {
-      this.router.navigate(['/']);
-    }
   }
 
   ngOnDestroy(): void {}
@@ -27,6 +23,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     if (!form.valid) {
       return;
     }
+
     const authData: AuthData = {
       password: form.value.password,
       username: form.value.username

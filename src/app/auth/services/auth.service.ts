@@ -24,7 +24,7 @@ export class AuthService {
   constructor(
     private http: HttpClient,
     private router: Router,
-    private flashMsg: FlashMessagesService
+    private flashMsg: FlashMessagesService,
   ) {}
 
   createUser(authData: AuthData) {
@@ -47,10 +47,14 @@ export class AuthService {
   }
 
   login(authData: AuthData) {
+
+    console.log(BACKEND_URL);
     this.http
       .post<SuccessLoginData>(BACKEND_URL + '/login', authData)
       .subscribe(
         (response: SuccessLoginData) => {
+
+    console.log('response');
           if (response.success) {
             this.token = response.token;
             const expiresInDuration = response.expiresIn;
@@ -71,6 +75,8 @@ export class AuthService {
           }
         },
         (error: ServerMessage) => {
+          console.log(error);
+
           this.flashMsg.show('Error while authenticating: ' + error.message, {
             cssClass: 'alert-danger',
             timeout: 4000

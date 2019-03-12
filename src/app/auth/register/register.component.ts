@@ -2,7 +2,6 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { AuthData } from '../AuthData';
 import { AuthService } from '../services/auth.service';
-import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-register',
@@ -11,13 +10,10 @@ import { Router } from '@angular/router';
 })
 export class RegisterComponent implements OnInit, OnDestroy {
   isLoggedIn: boolean;
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(private authService: AuthService) {}
 
   ngOnInit() {
     this.isLoggedIn = this.authService.getIsAuth();
-    if (this.isLoggedIn) {
-      this.router.navigate(['/']);
-    }
   }
 
   ngOnDestroy(): void {
