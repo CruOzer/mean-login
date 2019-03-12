@@ -1,14 +1,13 @@
 import { Injectable } from '@angular/core';
-import { environment } from '../../environments/environment';
+import { environment } from '../../../environments/environment';
 
-import { UserData } from './UserData';
-import { AuthData } from './AuthData';
+import { AuthData } from '../AuthData';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Subject, Observable } from 'rxjs';
-import { ServerMessage } from '../models/ServerMessage';
+import { ServerMessage } from '../../models/ServerMessage';
 import { FlashMessagesService } from 'angular2-flash-messages';
-import { SuccessLoginData } from './SuccessLoginData';
+import { SuccessLoginData } from '../models/SuccessLoginData';
 
 const BACKEND_URL: string = environment.apiUrl + '/users';
 

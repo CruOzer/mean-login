@@ -42,7 +42,7 @@ app.use(bodyParser.json());
 
 // Middleware passport
 app.use(passport.initialize());
-app.use(passport.session());
+// app.use(passport.session()); Stores data in session -> cookies https://medium.com/front-end-weekly/learn-using-jwt-with-passport-authentication-9761539c4314
 require('./config/passport')(passport);
 
 // Use Routes

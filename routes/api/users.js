@@ -70,7 +70,6 @@ router.post('/login', (req, res) => {
       });
     })
     .catch(err => {
-      console.log(err);
       res.status(500).json({ // Other errors
         success: false,
         message: err
@@ -78,12 +77,17 @@ router.post('/login', (req, res) => {
     })
 });
 
-router.get('/profile', passport.authenticate('jwt', {
+router.get('/:id', passport.authenticate('jwt', {
   session: false
 }), (req, res) => {
-  res.json({
-    user: req.user
-  });
+  User.getUserById(req.params.id)
+    .then(user => {
+      res.status(200).json(user);
+    })
+    .catch(err => res.status(500).json({
+      success: false,
+      message: 'Failed to register user'
+    }));
 });
 
 module.exports = router;
