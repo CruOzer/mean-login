@@ -1,9 +1,156 @@
 import { Injectable } from '@angular/core';
+import { environment } from '../../environments/environment';
+
+import { UserData } from './UserData';
+import { AuthData } from './AuthData';
+import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
+import { Subject, Observable } from 'rxjs';
+import { ServerMessage } from '../models/ServerMessage';
+
+const BACKEND_URL: string = environment.apiUrl + '/users';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
+  private isAuthenticated = false;
+  private authStatusListener = new Subject<boolean>();
+  private token: string;
+  private tokenTimer: any;
+  private userId: string;
 
-  constructor() { }
+  constructor(private http: HttpClient, private router: Router) {}
+
+  createUser(authData: AuthData) {
+    this.http.post(BACKEND_URL + '/register', authData).subscribe(
+      (msg: ServerMessage) => {
+        this.router.navigate(['/auth/login']);
+      },
+      (error: ServerMessage) => {
+        this.authStatusListener.next(false);
+      }
+    );
+  }
+
+  login(authData: AuthData) {
+    this.http
+      .post<{
+        success: boolean;
+        token: string;
+        expiresIn: number;
+        user: UserData;
+      }>(BACKEND_URL + '/login', authData)
+      .subscribe(
+        (response: {
+          success: boolean;
+          token: string;
+          expiresIn: number;
+          user: UserData;
+        }) => {
+          if (response.success) {
+            this.token = response.token;
+            const expiresInDuration = response.expiresIn;
+            this.setAuthTime(expiresInDuration);
+            this.setAuthentication(true);
+            this.userId = response.user.id;
+            // Save Data
+            const now = new Date();
+            const expirationDate = new Date(
+              now.getTime() + expiresInDuration * 1000
+            );
+            this.saveAuthData(this.token, expirationDate, this.userId);
+            this.router.navigate(['/']);
+          }
+        },
+        (err: ServerMessage) => {
+          this.setAuthentication(false);
+        }
+      );
+  }
+
+  logout() {
+    this.token = null;
+    this.userId = null;
+    this.setAuthentication(false);
+    clearTimeout(this.tokenTimer);
+    this.clearAuthData();
+    this.router.navigate(['/']);
+  }
+
+  autoAuthUser() {
+    const info: {
+      token: string;
+      expirationDate: Date;
+      userId: string;
+    } = this.getAuthData();
+    if (!info) {
+      return;
+    }
+    const now = new Date();
+    const expiresIn = info.expirationDate.getTime() - now.getTime();
+    if (expiresIn > 0) {
+      this.token = info.token;
+      this.userId = info.userId;
+      this.setAuthTime(expiresIn / 1000);
+      this.setAuthentication(true);
+    }
+  }
+
+  getToken(): string {
+    return this.token;
+  }
+
+  getIsAuth(): boolean {
+    return this.isAuthenticated;
+  }
+
+  getUserId(): string {
+    return this.userId;
+  }
+
+  getAuthStatusListener(): Observable<boolean> {
+    return this.authStatusListener.asObservable();
+  }
+
+  private setAuthTime(duration: number) {
+    this.tokenTimer = setTimeout(() => {
+      this.logout();
+    }, duration * 1000);
+  }
+
+  private setAuthentication(auth: boolean) {
+    this.isAuthenticated = auth;
+    this.authStatusListener.next(auth);
+  }
+
+  private getAuthData(): {
+    token: string;
+    expirationDate: Date;
+    userId: string;
+  } {
+    const token = localStorage.getItem('tokenMeanCourse');
+    const userId = localStorage.getItem('userMeanCourse');
+    const expirationDate = localStorage.getItem('expirationMeanCourse');
+    if (!token && !expirationDate) {
+      return;
+    }
+    return {
+      token,
+      userId,
+      expirationDate: new Date(expirationDate)
+    };
+  }
+
+  private saveAuthData(token: string, expirationDate: Date, userId: string) {
+    localStorage.setItem('tokenMeanCourse', token);
+    localStorage.setItem('expirationMeanCourse', expirationDate.toISOString());
+    localStorage.setItem('userMeanCourse', userId);
+  }
+
+  private clearAuthData() {
+    localStorage.removeItem('tokenMeanCourse');
+    localStorage.removeItem('expirationMeanCourse');
+    localStorage.removeItem('userMeanCourse');
+  }
 }

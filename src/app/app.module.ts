@@ -10,15 +10,12 @@ import { HomeComponent } from './components/home/home.component';
 
 import { AuthInterceptor } from './auth/auth-interceptor';
 
-
 @NgModule({
-  declarations: [
-    AppComponent,
-    NavbarComponent,
-    HomeComponent
+  declarations: [AppComponent, NavbarComponent, HomeComponent],
+  imports: [BrowserModule, AppRoutingModule, HttpClientModule],
+  providers: [
+    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }
   ],
-  imports: [BrowserModule, AppRoutingModule],
-  providers: [ { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }],
   bootstrap: [AppComponent]
 })
 export class AppModule {}
