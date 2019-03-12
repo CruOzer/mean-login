@@ -8,6 +8,7 @@ import { Router } from '@angular/router';
 import { Subject, Observable } from 'rxjs';
 import { ServerMessage } from '../models/ServerMessage';
 import { FlashMessagesService } from 'angular2-flash-messages';
+import { SuccessLoginData } from './SuccessLoginData';
 
 const BACKEND_URL: string = environment.apiUrl + '/users';
 
@@ -48,19 +49,9 @@ export class AuthService {
 
   login(authData: AuthData) {
     this.http
-      .post<{
-        success: boolean;
-        token: string;
-        expiresIn: number;
-        user: UserData;
-      }>(BACKEND_URL + '/login', authData)
+      .post<SuccessLoginData>(BACKEND_URL + '/login', authData)
       .subscribe(
-        (response: {
-          success: boolean;
-          token: string;
-          expiresIn: number;
-          user: UserData;
-        }) => {
+        (response: SuccessLoginData) => {
           if (response.success) {
             this.token = response.token;
             const expiresInDuration = response.expiresIn;
