@@ -10,7 +10,7 @@
 # dependencies
 /node_modules
 
-# Settings
+#Environment Variables
 .env
 
 # profiling files
