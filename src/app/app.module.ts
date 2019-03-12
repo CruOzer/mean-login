@@ -10,11 +10,20 @@ import { HomeComponent } from './components/home/home.component';
 
 import { AuthInterceptor } from './auth/auth-interceptor';
 
+import { FlashMessagesModule } from 'angular2-flash-messages';
+import { FlashMessagesService } from 'angular2-flash-messages';
+
 @NgModule({
   declarations: [AppComponent, NavbarComponent, HomeComponent],
-  imports: [BrowserModule, AppRoutingModule, HttpClientModule],
+  imports: [
+    BrowserModule,
+    FlashMessagesModule.forRoot(),
+    AppRoutingModule,
+    HttpClientModule
+  ],
   providers: [
-    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }
+    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
+    FlashMessagesService
   ],
   bootstrap: [AppComponent]
 })

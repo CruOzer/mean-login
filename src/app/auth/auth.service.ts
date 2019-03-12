@@ -7,6 +7,7 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Subject, Observable } from 'rxjs';
 import { ServerMessage } from '../models/ServerMessage';
+import { FlashMessagesService } from 'angular2-flash-messages';
 
 const BACKEND_URL: string = environment.apiUrl + '/users';
 
@@ -20,14 +21,26 @@ export class AuthService {
   private tokenTimer: any;
   private userId: string;
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(
+    private http: HttpClient,
+    private router: Router,
+    private flashMsg: FlashMessagesService
+  ) {}
 
   createUser(authData: AuthData) {
     this.http.post(BACKEND_URL + '/register', authData).subscribe(
       (msg: ServerMessage) => {
+        this.flashMsg.show('You are now registered and can log in', {
+          cssClass: 'alert-success',
+          timeout: 4000
+        });
         this.router.navigate(['/auth/login']);
       },
       (error: ServerMessage) => {
+        this.flashMsg.show('Error while registering: ' + error.message, {
+          cssClass: 'alert-danger',
+          timeout: 4000
+        });
         this.authStatusListener.next(false);
       }
     );
@@ -60,10 +73,18 @@ export class AuthService {
               now.getTime() + expiresInDuration * 1000
             );
             this.saveAuthData(this.token, expirationDate, this.userId);
+            this.flashMsg.show('You are now logged in.', {
+              cssClass: 'alert-success',
+              timeout: 4000
+            });
             this.router.navigate(['/']);
           }
         },
-        (err: ServerMessage) => {
+        (error: ServerMessage) => {
+          this.flashMsg.show('Error while authenticating: ' + error.message, {
+            cssClass: 'alert-danger',
+            timeout: 4000
+          });
           this.setAuthentication(false);
         }
       );
@@ -75,6 +96,10 @@ export class AuthService {
     this.setAuthentication(false);
     clearTimeout(this.tokenTimer);
     this.clearAuthData();
+    this.flashMsg.show('You are now logged out.', {
+      cssClass: 'alert-success',
+      timeout: 4000
+    });
     this.router.navigate(['/']);
   }
 
